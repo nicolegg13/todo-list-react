@@ -1,0 +1,238 @@
+- Endereço: C:\Users\Cliente\nicolegg13\react-studies\react\index.html:
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + React</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+
+
+- Endereço: C:\Users\Cliente\nicolegg13\react-studies\react\src\App.jsx:
+import { useState } from "react";
+import "./App.css";
+import Tasks from "./components/Tasks";
+import AddTask from "./components/AddTask";
+import {v4} from 'uuid';
+
+function App() {
+  // const [msg, setMsg] = useState("Mensagem inicial")
+  const [tasks, setTasks] = useState([{
+    id: 1,
+    title: "Tarefa 1",
+    description: "aaaaaaaaaaaaaaaaaaaaaaaa",
+    isCompleted: false
+  }, {
+    id: 2,
+    title: "Tarefa 2",
+    description: "aaaaaaaaaaaaaaaaaaaaaaaa",
+    isCompleted: true
+  }, {
+    id: 3,
+    title: "Tarefa 3",
+    description: "aaaaaaaaaaaaaaaaaaaaaaaa",
+    isCompleted: true
+  }
+]);
+
+
+// recebe qual tarefa foi clicada
+function onTaskClick(taskId) {
+  const newTasks = tasks.map(task => {
+    //verificase o id da tarefa atual é o id da tarefa clicada
+    if (task.id === taskId) { //achou
+      //retorna nova tarefa com dados e isCompleted invertido
+      return {
+        ...task, isCompleted: !task.isCompleted
+      }
+    }
+    //else - retorna tarefa atual 
+    return task;
+  });
+  //atualiza estado para a nova lista de tarefas
+  setTasks(newTasks);
+}
+
+
+//mantem na lista todas as tarefas diferentes da tarefa clicada
+function onDeleteTaskClick(taskId) {
+  const newTasks = tasks.filter(task => task.id != taskId);
+  //atualiza estado para a nova lista de tarefas
+  setTasks(newTasks);
+}
+
+
+//adiciona nova tarefa na lista
+function onAddTaskSubmit (title, description) {
+  const newTask = {
+    id: v4(), //gera id
+    title, //mesmo nome do parametro
+    description,
+    isCompleted: false,
+  };
+  setTasks([...tasks, newTask]); //adiciona nova tarefa no final da lista - atualiza estado
+}
+
+
+// renderiza tudo (componentes filhos)
+  return (
+    <div className="w-screen h-screen bg-slate-500 flex justify-center p-6">
+      <div className="width[500px] space-y-4"> {/* espaço vertical entre elementos */}
+        <h1 className="text-3xl text-slate-100 font-bold text-center">Gerenciador de tarefas</h1>
+        {/* renderizar */}
+        <AddTask onAddTaskSubmit={onAddTaskSubmit}/>
+        <Tasks tasks = {tasks} onTaskClick = {onTaskClick} onDeleteTaskClick={onDeleteTaskClick} onAddTaskSubmit={onAddTaskSubmit}/> {/* componente filho */}
+        {/* passar os valores - passa a função onTaskClick como prop*/}
+      </div>
+    </div>
+  );
+}
+
+
+export default App;
+.
+.
+- Endereço: C:\Users\Cliente\nicolegg13\react-studies\react\src\main.jsx:
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import App from './App.jsx'
+import './index.css'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import TaskPage from './pages/TaskPage.jsx';
+
+const router = createBrowserRouter([
+  { //objeto
+    path: "/", //default, tela inicial
+    element: <App />, //o que vai ser renderizado na página inicial
+  },
+  {
+    path: "/task",
+    element: <TaskPage />,
+  }
+])
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <RouterProvider router={router} />
+    {/* <App /> */}
+  </StrictMode>,
+)
+.
+.
+- Endereço: C:\Users\Cliente\nicolegg13\react-studies\react\src\components\AddTask.jsx:
+import { useState } from "react";
+
+function AddTask({onAddTaskSubmit}) { //props
+
+    //acessar valor dos inputs
+    const [title, setTitle] = useState(""); //inicia vazio (no input)
+    const [description, setDescription] = useState("");
+    // console.log({ title, description });
+
+  return (
+    <div className="space-y-4 p-6 bg-slate-200 rounded-md shadow flex flex-col">
+      <h1>Add task</h1>
+      <form>
+        <input type="text" placeholder="Task title" 
+        className="p-2 rounded-md w-full mb-2 border border-slate-300 outline-slate-400 px-4 py-2" 
+        value={title} onChange={(event) => setTitle(event.target.value)} //atualiza state conform muda input
+        />
+        
+        <textarea placeholder="Task description" 
+        className="p-2 rounded-md w-full mb-2 border border-slate-300 outline-slate-400 px-4 py-2" 
+        value={description} onChange={(event) => setDescription(event.target.value)}
+        />
+        
+        <button className="bg-slate-500 text-white px-4 py-2 rounded-md w-full"
+        onClick={() => {
+            if (!title.trim() || !description.trim()) { //.trim() -- verifica alem de espaços (nao conta)
+              return alert("Preencha todos os campos");
+            }
+            onAddTaskSubmit(title, description);
+            setTitle("");
+            setDescription(""); //limpa
+        }} //chama função que foi passada como prop, states tem os valores dos inputs
+        >adicionar</button>
+      </form>
+    </div>
+  );
+}
+
+export default AddTask;
+.
+.
+- Endereço: C:\Users\Cliente\nicolegg13\react-studies\react\src\components\Tasks.jsx:
+import { ChevronRightIcon, DeleteIcon } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+// function Tasks(props) {
+function Tasks({tasks, onTaskClick, onDeleteTaskClick}) { //desestruturação de props
+  // return <h3>{tasks[0].title}</h3>; //renderiza no html
+  const navigate = useNavigate() //retorna uma função que permite a navegação programática: redirecionar o usuário em resposta a interações
+
+  function onSeeDetailsClick(task) { //quando clica no botão para ver detalhes
+    navigate(`/task?title=${task.title}&description=${task.description}`)
+  }
+
+
+  return (
+    <ul className="space-y-4 p-6 bg-slate-200 rounded-md shadow">
+      {tasks.map((task) => (
+        <li key={task.id} className="flex gap-2">
+            {/* task.id é o id da tarefa atual */}
+            {/* props.onTaskClick é a função que foi passada como prop */}
+            {/* task.id é passado como argumento para a função onTaskClick - atualiza estado*/}
+          <button onClick={() => onTaskClick(task.id)}
+          className={`text-left bg-slate-400 text-white p-2 rounded-md w-full
+            ${task.isCompleted && 'line-through'}`}> {/* se task.isCompleted == true, adiciona a classe line-through */}
+            {task.title}
+            {/* {task.isCompleted ? " ✅" : " ❌"} */}
+            </button>
+
+            {/* quando clicar no botão, vai para a pagina com infos dessa task 
+            chama função de mostrar detalhes passando task atual de parametro*/}
+          <button onClick={() => onSeeDetailsClick(task)} className="bg-slate-400 text-white p-2 rounded-md">
+            <ChevronRightIcon />
+          </button>
+
+          {/* quando clica nesse botão, chama a função onDeleteTaskClick passando o id da tarefa atual 
+          função tira a tarefa do state*/}
+          <button  onClick={() => onDeleteTaskClick(task.id)} 
+          className="bg-slate-400 text-white p-2 rounded-md">
+            <DeleteIcon />
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export default Tasks;
+.
+.
+- Endereço: C:\Users\Cliente\nicolegg13\react-studies\react\src\pages\TaskPage.jsx:
+import { useSearchParams } from "react-router-dom"
+
+function TaskPage() {
+    const [searchParams] = useSearchParams(); //pega 1o elemento da lista - searchParams
+    //pega valores
+    const title = searchParams.get("title")
+    const description = searchParams.get("description")
+
+    return (
+    <div className="w-screen h-screen bg-slate-500 flex justify-center p-6">
+        <h1>{title}</h1>
+        <p>{description}</p>
+    </div>
+    );
+
+}
+
+export default TaskPage.
+.
