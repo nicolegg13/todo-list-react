@@ -24,10 +24,10 @@ function Tasks({tasks, onTaskClick, onDeleteTaskClick}) { //desestruturação de
             {/* props.onTaskClick é a função que foi passada como prop */}
             {/* task.id é passado como argumento para a função onTaskClick - atualiza estado*/}
           <button onClick={() => onTaskClick(task.id)}
-          className={`text-left bg-slate-400 text-white p-2 rounded-md w-full
+          className={`text-left items-center flex gap-2 bg-slate-400 text-white p-2 rounded-md w-full
             ${task.isCompleted && 'line-through'}`}> {/* se task.isCompleted == true, adiciona a classe line-through */}
+            {task.isCompleted ? " ✅ " : null }
             {task.title}
-            {/* {task.isCompleted ? " ✅" : " ❌"} */}
             </button>
 
             {/* quando clicar no botão, vai para a pagina com infos dessa task 
